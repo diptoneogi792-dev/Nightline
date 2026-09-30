@@ -136,11 +136,15 @@ Verified results for this build: Compact compiled two circuits, 9 frontend/contr
 
 ![Nightline test results showing frontend, contract, and backend checks](docs/assets/test-results.png)
 
-## CI/CD Pipeline
+## Working CI CD Pipeline
 
 `.github/workflows/ci-cd.yml` runs frontend lint, tests, contract build, and production build plus backend tests and lint on pull requests and pushes to `main` or `master`. No GitHub secrets or deploy tokens are needed.
 
 For CD, Netlify deploys from its normal Git connection. Render deploys after GitHub checks pass (`autoDeployTrigger: checksPass` in `render.yaml`). If Netlify is already connected to this repository, pushes continue to publish the site automatically.
+
+GitHub Actions showing the latest wallet compatibility workflow run passing:
+
+![GitHub Actions workflow runs with the latest CI check passing](docs/assets/github-actions-ci-cd.png)
 
 ## Deployment
 
