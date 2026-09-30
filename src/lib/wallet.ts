@@ -16,7 +16,6 @@ export const discoverWallets = (): Array<WalletSummary & { api: InitialAPI }> =>
       && typeof api === 'object'
       && typeof api.connect === 'function'
       && semver.satisfies(api.apiVersion, '4.x')
-      && isOneAm({ name: api.name, rdns: api.rdns ?? '' })
     ))
     .map(([providerId, api]) => ({
       providerId,
@@ -25,5 +24,8 @@ export const discoverWallets = (): Array<WalletSummary & { api: InitialAPI }> =>
       apiVersion: api.apiVersion,
       api,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (
+      Number(isOneAm(b)) - Number(isOneAm(a))
+      || a.name.localeCompare(b.name)
+    ));
 };
