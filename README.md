@@ -1,6 +1,6 @@
 # Nightline
 
-Nightline is a privacy-preserving weekly support pulse for students. A student answers three questions and can keep a private note on their own device. A Compact circuit turns those private values into one public support band, enforces one-use submission with a nullifier, and records a finalized proof on Midnight.
+Nightline is a privacy-preserving weekly support pulse for students. The students answers three questions and can keep a private note on their own device. A Compact circuit turns those private values into one public support band, enforces one-use submission with a nullifier, and records a finalized proof on Midnight.
 
 Each student connects 1AM and deploys their own Nightline worker contract from the browser. The frontend retains that worker’s real contract address and finalized deployment transaction hash per network. It never fabricates identifiers or treats an unfinalized transaction as complete.
 
