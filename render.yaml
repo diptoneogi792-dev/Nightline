@@ -3,6 +3,7 @@ services:
     name: nightline-api
     runtime: docker
     plan: free
+    autoDeployTrigger: checksPass
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health

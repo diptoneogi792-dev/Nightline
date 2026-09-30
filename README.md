@@ -69,6 +69,40 @@ Copy `.env.example` to `.env` and set `VITE_API_URL`. `VITE_PROOF_SERVER_URL` is
 
 Switching networks clears the active wallet session and loads only that network’s retained deployment. Disconnecting clears the in-memory connection but does not revoke the extension’s permission.
 
+## Preprod
+
+- **Status:** Successful deployment at block 2,776,359.
+- **Contract address:** [`d9433b8c29d5ef4e85162eb19dabd02885ab3d4c96b61f2fa199965a863060a3`](https://explorer.1am.xyz/contract/d9433b8c29d5ef4e85162eb19dabd02885ab3d4c96b61f2fa199965a863060a3)
+- **Deployment transaction hash:** [`dd6f17a84d15a8489abe4d5bfbe4a6632f25558cb9327638d18ef4d0b2f31032`](https://explorer.1am.xyz/tx/dd6f17a84d15a8489abe4d5bfbe4a6632f25558cb9327638d18ef4d0b2f31032?network=preprod)
+
+## Live Website Screenshots
+
+The Preprod app with 1AM connected and the student pulse form:
+
+![Nightline Preprod pulse form with 1AM connected](docs/assets/live-website-preprod-overview.png)
+
+The retained worker address and deployment transaction, with the proof error visible during the subsequent step:
+
+![Nightline Preprod worker details and proof diagnostic](docs/assets/live-website-preprod-worker.png)
+
+## Live Website URL
+
+[https://nightline34.netlify.app/](https://nightline34.netlify.app/)
+
+## Demo Video URL
+
+[Watch the Nightline demo on Google Drive](https://drive.google.com/file/d/1DJO8OIRNh5sveu-BS6IJfeMcSXjz_sIa/view?usp=sharing)
+
+## Mobile Responsive UI
+
+Nightline's student pulse form at a phone-sized viewport:
+
+![Nightline mobile pulse form on Preview](docs/assets/mobile-responsive-overview.jpg)
+
+The mobile worker panel and wallet connection step:
+
+![Nightline mobile worker panel and connect flow](docs/assets/mobile-responsive-worker.jpg)
+
 ## Neon
 
 Create production and development branches in Neon. Use the pooled URL as `DATABASE_URL` for API traffic and the direct URL as `DATABASE_DIRECT_URL` for Alembic. Run migrations against the development branch first:
@@ -102,13 +136,17 @@ Verified results for this build: Compact compiled two circuits, 9 frontend/contr
 
 ![Nightline test results showing frontend, contract, and backend checks](docs/assets/test-results.png)
 
+## CI/CD Pipeline
+
+`.github/workflows/ci-cd.yml` runs frontend lint, tests, contract build, and production build plus backend tests and lint on pull requests and pushes to `main` or `master`. No GitHub secrets or deploy tokens are needed.
+
+For CD, Netlify deploys from its normal Git connection. Render deploys after GitHub checks pass (`autoDeployTrigger: checksPass` in `render.yaml`). If Netlify is already connected to this repository, pushes continue to publish the site automatically.
+
 ## Deployment
 
-For Netlify, import this folder, set the frontend environment values, and deploy using `netlify.toml`. The committed `contract/src/managed/nightline` artifacts are copied into the final `/keys` and `/zkir` paths during every build.
+For Netlify, connect this repository once if it is not already connected, and set `VITE_API_URL` in the Netlify site environment to the Render API URL. The committed `contract/src/managed/nightline` artifacts are copied into the final `/keys` and `/zkir` paths during each build.
 
-For Render, apply `render.yaml`. Configure the Neon URLs, Gemini key, and the deployed Netlify origin. Set Netlify’s `VITE_API_URL` to the Render API URL, then rebuild the frontend. Keep proving on the user-controlled server configured in 1AM; do not route private witness material through the public API service.
-
-No live URL is claimed because deployment requires the user’s Netlify, Render, Neon, Gemini, and funded 1AM accounts.
+For Render, apply `render.yaml` and connect it to this GitHub repository. Configure the Neon URLs, Gemini key, and the deployed Netlify origin. Keep proving on the user-controlled server configured in 1AM; do not route private witness material through the public API service.
 
 ## Project map
 
