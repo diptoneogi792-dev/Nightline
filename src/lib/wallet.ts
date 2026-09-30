@@ -2,12 +2,22 @@ import type { InitialAPI } from '@midnight-ntwrk/dapp-connector-api';
 import semver from 'semver';
 import type { WalletSummary } from './types';
 
-const isOneAm = (wallet: Pick<WalletSummary, 'name' | 'rdns'>): boolean => /1\s*am|oneam/i.test(`${wallet.name} ${wallet.rdns}`);
+const isOneAm = (wallet: Pick<WalletSummary, 'name' | 'rdns'>): boolean => {
+  const nameMatches = /(?:^|\s)1\s*am(?:\s+wallet)?(?:$|\s)/i.test(wallet.name.trim());
+  const rdnsMatches = /(?:^|[._-])(?:1am|oneam)(?:[._-]|$)/i.test(wallet.rdns);
+  return nameMatches || rdnsMatches;
+};
 
 export const discoverWallets = (): Array<WalletSummary & { api: InitialAPI }> => {
   const entries = Object.entries(window.midnight ?? {});
   return entries
-    .filter(([, api]) => api && typeof api === 'object' && semver.satisfies(api.apiVersion, '4.x'))
+    .filter(([, api]) => (
+      api
+      && typeof api === 'object'
+      && typeof api.connect === 'function'
+      && semver.satisfies(api.apiVersion, '4.x')
+      && isOneAm({ name: api.name, rdns: api.rdns ?? '' })
+    ))
     .map(([providerId, api]) => ({
       providerId,
       name: String(api.name).slice(0, 80),
@@ -15,5 +25,5 @@ export const discoverWallets = (): Array<WalletSummary & { api: InitialAPI }> =>
       apiVersion: api.apiVersion,
       api,
     }))
-    .sort((a, b) => Number(isOneAm(b)) - Number(isOneAm(a)));
+    .sort((a, b) => a.name.localeCompare(b.name));
 };

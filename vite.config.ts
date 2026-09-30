@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import wasm from 'vite-plugin-wasm';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   build: {
@@ -43,6 +44,10 @@ export default defineConfig({
     ],
   },
   resolve: {
+    alias: {
+      assert: fileURLToPath(new URL('./src/lib/assert.ts', import.meta.url)),
+      'isomorphic-ws': fileURLToPath(new URL('./src/lib/isomorphic-ws.ts', import.meta.url)),
+    },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.wasm'],
     mainFields: ['browser', 'module', 'main'],
   },

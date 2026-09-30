@@ -321,6 +321,7 @@ function App() {
                   {error && (
                     <motion.div className="error-box" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} role="alert">
                       <strong>{error.kind.replace('-', ' ')}</strong><span>{error.message}</span>
+                      {error.detail && <small>Diagnostic: {error.detail}</small>}
                     </motion.div>
                   )}
                 </AnimatePresence>

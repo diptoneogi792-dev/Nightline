@@ -13,7 +13,7 @@ import {
   Transaction,
   type TransactionId,
 } from '@midnight-ntwrk/midnight-js-protocol/ledger';
-import type { MidnightProviders, UnboundTransaction } from '@midnight-ntwrk/midnight-js-types';
+import { createProofProvider, type MidnightProviders, type UnboundTransaction } from '@midnight-ntwrk/midnight-js-types';
 import { CompiledNightlineContract } from '../../contract/src';
 import type { NightlinePrivateState } from '../../contract/src/witnesses';
 import { inMemoryPrivateStateProvider } from './in-memory-private-state-provider';
@@ -44,6 +44,7 @@ export const connectPreferredWallet = async (network: Network): Promise<WalletCo
   if (!wallet) throw new AppError('wallet-missing', 'Install or unlock 1AM, then try again.');
   try {
     const connected = await wallet.api.connect(network);
+    await connected.hintUsage?.(['getConfiguration', 'getDustBalance', 'getProvingProvider', 'submitTransaction']);
     const [configuration, dust] = await Promise.all([
       connected.getConfiguration(),
       connected.getDustBalance(),
@@ -72,14 +73,19 @@ const createProviders = async (connection: WalletConnection, network: Network): 
   const { connected, configuration } = connection;
   const shielded = await connected.getShieldedAddresses();
   const zkConfigProvider = new FetchZkConfigProvider<CircuitKeys>(window.location.origin, fetch.bind(window));
-  const proofServer = configuration.proverServerUri || import.meta.env.VITE_PROOF_SERVER_URL;
-  if (!proofServer) throw new AppError('proof-service', 'No proof server is configured in 1AM or VITE_PROOF_SERVER_URL.');
+  const provingProvider = await connected.getProvingProvider(zkConfigProvider);
+  const proofProvider = provingProvider
+    ? createProofProvider(provingProvider)
+    : httpClientProofProvider(
+      configuration.proverServerUri || import.meta.env.VITE_PROOF_SERVER_URL || 'http://localhost:6300',
+      zkConfigProvider,
+    );
 
   return {
     privateStateProvider: inMemoryPrivateStateProvider<PrivateStateId, NightlinePrivateState>(),
     zkConfigProvider,
-    proofProvider: httpClientProofProvider(proofServer, zkConfigProvider),
-    publicDataProvider: indexerPublicDataProvider(configuration.indexerUri, configuration.indexerWsUri),
+    proofProvider,
+    publicDataProvider: indexerPublicDataProvider(configuration.indexerUri, configuration.indexerWsUri, window.WebSocket),
     walletProvider: {
       getCoinPublicKey: () => shielded.shieldedCoinPublicKey,
       getEncryptionPublicKey: () => shielded.shieldedEncryptionPublicKey,

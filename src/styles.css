@@ -160,6 +160,7 @@ h1 em, .receipt-main h2 em { color: var(--citron); font-style: normal; font-weig
 .error-box { display: grid; gap: 4px; padding: 11px 13px; border-left: 2px solid var(--coral); background: rgba(255,118,87,.09); }
 .error-box strong { color: var(--coral); font: 700 .64rem/1 ui-monospace, monospace; text-transform: uppercase; }
 .error-box span { color: #e1b6ac; font-size: .8rem; line-height: 1.35; }
+.error-box small { color: #c89488; font: .68rem/1.45 ui-monospace, monospace; overflow-wrap: anywhere; }
 .primary-action { margin-top: auto; width: 100%; min-height: 54px; padding: 0; border: 1px solid var(--paper); background: var(--paper); color: var(--ink); display: flex; align-items: stretch; justify-content: space-between; cursor: pointer; font-weight: 780; }
 .primary-action > span { display: grid; place-items: center start; padding: 0 18px; }
 .primary-action > i { width: 54px; display: grid; place-items: center; border-left: 1px solid rgba(7,10,19,.28); font: 700 .7rem/1 ui-monospace, monospace; font-style: normal; }
