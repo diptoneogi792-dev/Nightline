@@ -1,0 +1,86 @@
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+/** Answers live only in browser private state and enter the circuit through this witness. */
+struct PrivatePulse {
+  workload: Uint<8>,
+  belonging: Uint<8>,
+  energy: Uint<8>,
+  nonce: Bytes<32>
+}
+
+export ledger workerCommitment: Bytes<32>;
+export ledger steadySignals: Counter;
+export ledger stretchedSignals: Counter;
+export ledger urgentSignals: Counter;
+export ledger acceptedSignals: Counter;
+export ledger keyRotations: Counter;
+export ledger usedNullifiers: Set<Bytes<32>>;
+
+witness localSecretKey(): Bytes<32>;
+witness nextLocalSecretKey(): Bytes<32>;
+witness privatePulse(): PrivatePulse;
+
+export circuit commitmentFor(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "nightline:worker:"),
+    secret
+  ]);
+}
+
+constructor() {
+  // Only the one-way worker commitment is public. The local secret never leaves the device.
+  workerCommitment = disclose(commitmentFor(localSecretKey()));
+}
+
+/**
+ * Produces one public support band from three private 0–4 answers.
+ * disclose() is deliberate: validation success, the coarse band, and the unlinkable
+ * nullifier are the minimum public facts needed for an auditable aggregate.
+ */
+export circuit submitPulse(): Uint<8> {
+  const secret = localSecretKey();
+  assert(commitmentFor(secret) == workerCommitment, "worker secret does not match");
+
+  const pulse = privatePulse();
+  assert(disclose(pulse.workload <= 4), "workload answer outside range");
+  assert(disclose(pulse.belonging <= 4), "belonging answer outside range");
+  assert(disclose(pulse.energy <= 4), "energy answer outside range");
+
+  const nullifier = persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "nightline:pulse:"),
+    secret,
+    pulse.nonce
+  ]);
+  assert(!usedNullifiers.member(disclose(nullifier)), "pulse already submitted");
+  usedNullifiers.insert(disclose(nullifier));
+
+  const total = pulse.workload + pulse.belonging + pulse.energy;
+  if (disclose(total >= 9)) {
+    urgentSignals.increment(1);
+    acceptedSignals.increment(1);
+    return 2;
+  } else if (disclose(total >= 5)) {
+    stretchedSignals.increment(1);
+    acceptedSignals.increment(1);
+    return 1;
+  } else {
+    steadySignals.increment(1);
+    acceptedSignals.increment(1);
+    return 0;
+  }
+}
+
+/**
+ * Replaces a compromised local secret after proving knowledge of the current one.
+ * disclose() publishes only the new one-way commitment and the fact of rotation.
+ */
+export circuit rotateWorkerKey(): [] {
+  const currentSecret = localSecretKey();
+  assert(commitmentFor(currentSecret) == workerCommitment, "worker secret does not match");
+  const nextCommitment = commitmentFor(nextLocalSecretKey());
+  assert(disclose(nextCommitment != workerCommitment), "new worker secret must differ");
+  workerCommitment = disclose(nextCommitment);
+  keyRotations.increment(1);
+}

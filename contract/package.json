@@ -1,0 +1,13 @@
+{
+  "name": "nightline-contract",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compact": "compact compile +0.31.1 src/nightline.compact src/managed/nightline",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-js": "2.5.1"
+  }
+}
